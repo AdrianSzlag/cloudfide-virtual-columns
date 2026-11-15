@@ -1,0 +1,45 @@
+# Task instructions must not be included in the repository.
+/task-virtual-column.md
+/task-virtual-column.pdf
+
+# Local agent instructions
+AGENTS.md
+
+# Python bytecode and virtual environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Test, coverage, and tool caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# Build and packaging artifacts
+build/
+dist/
+*.egg-info/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+.python-version
+
+# Editor and operating system files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.log
+
+# Keep sales.csv, test_virtual_column.py, and revenue_by_region.csv tracked.
