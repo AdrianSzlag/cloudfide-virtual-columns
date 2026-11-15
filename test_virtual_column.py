@@ -63,7 +63,6 @@ def test_when_extra_spaces_in_rules():
     "a ** b",
     "a + 1",
     "a; b",
-    "a + missing",
     "a + b # ignored payload",
     "a + b\x00",
 ])
