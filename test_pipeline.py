@@ -40,6 +40,37 @@ def test_keeps_distinct_lines_with_the_same_order_id(raw_sales):
     assert len(clean_sales(raw_sales)) == 2
 
 
+def test_fills_missing_prices_from_the_same_product(raw_sales):
+    raw_sales.loc[1, ["Product", "Unit Price"]] = ["Keyboard", "89.00"]
+    missing = raw_sales.copy()
+    missing["Order ID"] = ["SO-3", "SO-4"]
+    missing["Unit Price"] = ""
+    data = pd.concat([raw_sales, missing], ignore_index=True)
+
+    cleaned = clean_sales(data)
+
+    assert cleaned["unit_price"].tolist() == [2950, 8900, 2950, 8900]
+
+
+def test_aggregates_sales_and_returns_after_normalizing_regions(raw_sales, tmp_path):
+    raw_sales.loc[1, "Region"] = " north "
+    raw_sales.loc[2] = ["SO-3", "NORTH", "Mouse", "-1", "29.50", "", "2026-01-03"]
+    raw_sales.loc[3] = ["SO-4", "South", "Mouse", "1", "29.50", "", "2026-01-04"]
+    source = tmp_path / "sales.csv"
+    output = tmp_path / "result.csv"
+    raw_sales.to_csv(source, index=False)
+
+    result = run_pipeline(source, output)
+
+    # North: 2 * 29.50 + (29.50 - 0.50) - 29.50 = 58.50.
+    expected = pd.DataFrame({
+        "region": ["North", "South"],
+        "revenue": ["58.50", "29.50"],
+    })
+    pd.testing.assert_frame_equal(result, expected)
+    pd.testing.assert_frame_equal(pd.read_csv(output, dtype=str), expected)
+
+
 @pytest.mark.parametrize("known_prices", [[], ["29.50", "30.00"]])
 def test_does_not_guess_missing_prices(raw_sales, known_prices):
     rows = [raw_sales.iloc[0].copy() for _ in range(len(known_prices) + 1)]

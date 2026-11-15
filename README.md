@@ -33,13 +33,12 @@ flowchart TB
     Calculate -->|Invalid| Empty
 ```
 
-The function supports `+`, `-`, `*`, and parentheses with normal arithmetic precedence.
-It reads the syntax tree directly, without `eval()` or `DataFrame.eval()`.
+Expressions support column names, `+`, `-`, `*`, and parentheses with normal precedence;
+numeric constants and unary minus are not supported. Evaluation uses AST, without `eval()`.
 
-- Labels contain only ASCII letters and underscores. Duplicate labels and overwriting a column are rejected.
-- Referenced columns must be numeric, preventing arithmetic on Python objects or text.
-- Expressions are limited to 4096 characters. Invalid input returns an empty DataFrame.
-- The input DataFrame is unchanged. The function is not a sandbox for custom Python or pandas classes.
+- Labels use ASCII letters and underscores; duplicates and overwriting are rejected.
+- Referenced columns must be numeric. Expressions are limited to 4096 characters.
+- Invalid input returns an empty DataFrame; valid input returns a copy with the new column.
 
 ## Part 2: Sales Pipeline
 
@@ -72,8 +71,12 @@ Large quantities are kept; there is no evidence they are errors. Sale dates are 
 Amounts use one unspecified currency. Prices and discounts must be non-negative with at most two decimal places.
 `Decimal` converts amounts to integer hundredths for calculation and formats totals with two decimal places.
 
-Unexpected columns, malformed numbers, and integer overflow stop the pipeline before output is opened.
-Region names must contain letters and spaces, which also excludes spreadsheet formulas.
+Invalid columns, numbers or regions stop the pipeline before output is opened.
+Regions accept only ASCII letters and single spaces between words.
+
+To prevent `int64` overflow, the sum of `abs(quantity) * price + discount` across the
+whole file must not exceed `2**63 - 1` hundredths. This conservative limit can reject
+very large files even when individual regional totals fit, including offsetting sales and returns.
 
 ## Tests
 
